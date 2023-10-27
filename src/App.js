@@ -111,18 +111,6 @@ function App() {
   const [gpsX, setGpsX] = useState(-7.7952777777778);
   const [gpsY, setGpsY] = useState(110.36722222222);
 
-  // let tmp = "";
-  // for (let j = 1; j <= 10; ++j) {
-  //   if (j === 1) tmp += String(1234);
-  //   else if (j === 2) tmp += String(cnt);
-  //   else tmp += String(Math.random() * Math.random() * 100);
-  //   if (j < 10) {
-  //     tmp += ",";
-  //   } else {
-  //     tmp += ";";
-  //   }
-  // }
-
   useEffect(() => {
     const socket = io("https://gmat.haikalhilmi.my.id/");
     socket.on("message", (tmp) => {
