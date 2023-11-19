@@ -105,6 +105,7 @@ const MapGPS = ({ coorX, coorY }) => {
 };
 
 function App() {
+  const [random, setRandom] = useState(true);
   const [payload, setPayload] = useState([]);
   const [cnt, setCnt] = useState(0);
   const [teamID, setTeamID] = useState("undefined");
@@ -112,21 +113,60 @@ function App() {
   const [gpsY, setGpsY] = useState(110.36722222222);
 
   useEffect(() => {
-    const socket = io("https://gmat.haikalhilmi.my.id/");
-    socket.on("message", (tmp) => {
-      let newPayload = parsePayload(tmp);
-      setPayload((payload) => [...payload, newPayload]);
-      setTeamID(newPayload.TEAM_ID);
-      setCnt(cnt + 1);
-      setGpsX(
-        gpsX + Math.abs(newPayload.GPS_LATITUDE / newPayload.GPS_LATITUDE)
-      );
-      setGpsY(
-        gpsY + Math.abs(newPayload.GPS_LONGITUDE / newPayload.GPS_LONGITUDE)
-      );
-    });
-    return () => socket.emit("end");
-  }, []);
+    if (!random) {
+      const socket = io("https://gmat.haikalhilmi.my.id/");
+      socket.on("message", (tmp) => {
+        let newPayload = parsePayload(tmp);
+        setPayload((payload) => [...payload, newPayload]);
+        setTeamID(newPayload.TEAM_ID);
+        setCnt(cnt + 1);
+        setGpsX(
+          gpsX + Math.abs(newPayload.GPS_LATITUDE) / newPayload.GPS_LATITUDE
+        );
+        setGpsY(
+          gpsY + Math.abs(newPayload.GPS_LONGITUDE) / newPayload.GPS_LONGITUDE
+        );
+      });
+      return () => socket.emit("end");
+    } else {
+      setTimeout(() => {
+        let data = "";
+        for (let i = 1; i <= 10; ++i) {
+          if (i === 1) {
+            data += String(1234);
+          } else if (i === 2) {
+            setCnt(cnt + 1);
+            data += String(cnt);
+          } else {
+            data += String((Math.floor(Math.random() * 100) % 1000) + 1);
+          }
+          if (i < 10) data += ",";
+          else data += ";";
+        }
+        let newPayload = parsePayload(data);
+        setPayload((payload) => {
+          if (payload.length < 10) return [...payload, newPayload];
+          else {
+            let tmp = [];
+            for (let i = 1; i < payload.length; ++i) tmp.push(payload[i]);
+            tmp.push(newPayload);
+            return tmp;
+          }
+        });
+        setTeamID(newPayload.TEAM_ID);
+        setCnt(cnt + 1);
+        let addX = Math.abs(newPayload.GPS_LATITUDE) / newPayload.GPS_LATITUDE;
+        let addY =
+          Math.abs(newPayload.GPS_LONGITUDE) / newPayload.GPS_LONGITUDE;
+        let neg = Math.floor(Math.random() * 10) % 2;
+        if (neg === 1) addX *= -1;
+        neg = Math.floor(Math.random() * 10) % 2;
+        if (neg === 1) addY *= -1;
+        setGpsX(gpsX + addX);
+        setGpsY(gpsY + addY);
+      }, 1000);
+    }
+  }, [payload]);
   console.log("TEAM", teamID);
   return (
     <>
